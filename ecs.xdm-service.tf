@@ -1,7 +1,7 @@
 module "ecs_service" {
   source = "terraform-aws-modules/ecs/aws//modules/service"
 
-  name = "${local.prefix}-xdm-service"
+  name = "${local.prefix}-wp-service"
 
   cluster_arn = module.ecs_cluster.arn
 
@@ -11,7 +11,7 @@ module "ecs_service" {
 
   container_definitions = {
 
-    xdm-app = {
+    wp-app = {
 
       cpu       = 1024
       memory    = 2048
@@ -27,17 +27,15 @@ module "ecs_service" {
       ]
 
       environment = [
-        # { name = "WORDPRESS_DB_HOST", value = "jdbc:postgresql://${module.rds_xdm_db.cluster_endpoint}:5432/${module.rds_xdm_db.cluster_database_name}" },
-        { name = "WORDPRESS_DB_HOST", value = "${module.rds_xdm_db.cluster_endpoint}" },
-        { name = "WORDPRESS_DB_NAME", value = "${module.rds_xdm_db.cluster_database_name}" },
-        { name = "WORDPRESS_DB_USER", value = "${module.rds_xdm_db.cluster_master_username}" },
-        # { name = "WORDPRESS_DB_PASSWORD", value = "h|>VI?JWvr2RCef4Ja2fI$b~GUsO" }
+        { name = "WORDPRESS_DB_HOST", value = "${module.rds_wp_db.cluster_endpoint}" },
+        { name = "WORDPRESS_DB_NAME", value = "${module.rds_wp_db.cluster_database_name}" },
+        { name = "WORDPRESS_DB_USER", value = "${module.rds_wp_db.cluster_master_username}" },
       ]
 
       secrets = [
         {
           name      = "WORDPRESS_DB_PASSWORD"
-          valueFrom = "${tolist(module.rds_xdm_db.cluster_master_user_secret)[0].secret_arn}:password::"
+          valueFrom = "${tolist(module.rds_wp_db.cluster_master_user_secret)[0].secret_arn}:password::"
         }
       ]
 
@@ -48,8 +46,8 @@ module "ecs_service" {
 
   load_balancer = {
     service = {
-      target_group_arn = module.elb-xdm-frontend.target_groups["${local.prefix}-ecs-xdm-service"].arn
-      container_name   = "xdm-app"
+      target_group_arn = module.elb-wp-frontend.target_groups["${local.prefix}-ecs-wp-service"].arn
+      container_name   = "wp-app"
       container_port   = 80
     }
   }
@@ -60,7 +58,7 @@ module "ecs_service" {
       to_port                      = 80
       from_port                    = 80
       ip_protocol                  = "tcp"
-      referenced_security_group_id = module.elb-xdm-frontend.security_group_id
+      referenced_security_group_id = module.elb-wp-frontend.security_group_id
     }
   }
 
@@ -73,6 +71,6 @@ module "ecs_service" {
 
   subnet_ids = module.vpc.private_subnets
 
-  task_exec_secret_arns = ["${tolist(module.rds_xdm_db.cluster_master_user_secret)[0].secret_arn}"]
+  task_exec_secret_arns = ["${tolist(module.rds_wp_db.cluster_master_user_secret)[0].secret_arn}"]
 
 }

@@ -1,8 +1,8 @@
-module "elb-xdm-frontend" {
+module "elb-wp-frontend" {
   source  = "terraform-aws-modules/alb/aws"
   version = "9.9.0"
 
-  name    = "${local.prefix}-xdm-frontend"
+  name    = "${local.prefix}-wp-frontend"
   vpc_id  = module.vpc.vpc_id
   subnets = module.vpc.public_subnets
 
@@ -32,8 +32,8 @@ module "elb-xdm-frontend" {
 
 
   target_groups = {
-    "${local.prefix}-ecs-xdm-service" = {
-      name              = "${local.prefix}-xdm-service"
+    "${local.prefix}-ecs-wp-service" = {
+      name              = "${local.prefix}-wp-service"
       protocol          = "HTTP"
       port              = 80
       target_type       = "ip"
@@ -61,7 +61,7 @@ module "elb-xdm-frontend" {
       protocol = "HTTP"
 
       forward = {
-        target_group_key = "${local.prefix}-ecs-xdm-service"
+        target_group_key = "${local.prefix}-ecs-wp-service"
       }
     }
   }

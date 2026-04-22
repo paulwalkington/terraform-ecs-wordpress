@@ -45,4 +45,4 @@ docker push 055706347965.dkr.ecr.eu-west-2.amazonaws.com/pw-101-default-ecr-repo
 access the wordpress instance via the the laod balancer
 
 e.g.
-http://pw-101-default-xdm-frontend-418861426.eu-west-2.elb.amazonaws.com/
+http://pw-101-default-wp-frontend-343539590.eu-west-2.elb.amazonaws.com/

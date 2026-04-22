@@ -1,9 +1,9 @@
-module "rds_xdm_db" {
+module "rds_wp_db" {
   source = "terraform-aws-modules/rds-aurora/aws"
 
   name                = "${local.prefix}-wp-cluster"
   database_name       = "wordpress_db"
- engine                    = "aurora-mysql"
+  engine                    = "aurora-mysql"
   engine_version            = "5.7.mysql_aurora.2.11.6"
   cluster_instance_class      = "db.t3.small"
   skip_final_snapshot = true
