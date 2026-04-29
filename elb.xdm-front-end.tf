@@ -63,6 +63,30 @@ module "elb-wp-frontend" {
       forward = {
         target_group_key = "${local.prefix}-ecs-wp-service"
       }
+
+      # rules = {
+
+      #   ex-fixed-response = {
+                         
+      #     actions = [{
+      #       fixed_response = {
+
+      #         content_type = "text/plain"
+      #         status_code  = 200
+      #         message_body = "This is a fixed response"
+      #       }
+      #     }]
+
+      #     conditions = [{
+      #       http_header = {
+      #         http_header_name = "x-Gimme-Fixed-Response"
+      #         values           = ["yes", "please", "right now"]
+      #       }
+      #     }]
+      #   }
+      # }
+
     }
   }
 }
+

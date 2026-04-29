@@ -9,6 +9,11 @@ resource "aws_cloudfront_distribution" "cdn" {
       origin_protocol_policy = "http-only"
       origin_ssl_protocols   = ["TLSv1.2"]
     }
+
+    custom_header {
+        name  = "X-Allow"
+        value = "super_secret_token" // Please inject not set in clear text
+    }
   }
 
   enabled             = true
