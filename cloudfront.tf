@@ -1,3 +1,22 @@
+resource "aws_cloudfront_origin_request_policy" "allow_custom_headers" {
+  name    = "AllowCustomHeaders"
+  comment = "Temporary policy to allow disassociation before delete"
+
+  headers_config {
+    header_behavior = "none"
+  }
+
+  query_strings_config {
+    query_string_behavior = "none"
+  }
+
+  cookies_config {
+    cookie_behavior = "none"
+  }
+
+  depends_on = [aws_cloudfront_distribution.cdn]
+}
+
 resource "aws_cloudfront_distribution" "cdn" {
   origin {
     domain_name = module.elb-wp-frontend.dns_name
@@ -25,14 +44,8 @@ resource "aws_cloudfront_distribution" "cdn" {
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = "alb-origin"
 
-    forwarded_values {
-      query_string = false
-      cookies {
-        forward = "none"
-      }
-    }
-
-    viewer_protocol_policy = "allow-all"
+    cache_policy_id          = "658327ea-f89d-4fab-a63d-7e88639e58f6"  # Managed-CachingOptimized
+    viewer_protocol_policy   = "allow-all"
   }
 
   restrictions {

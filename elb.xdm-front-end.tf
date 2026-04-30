@@ -1,3 +1,7 @@
+data "aws_ec2_managed_prefix_list" "cloudfront_prefix_list" {
+  name = "com.amazonaws.global.cloudfront.origin-facing"
+}
+
 module "elb-wp-frontend" {
   source  = "terraform-aws-modules/alb/aws"
   version = "9.9.0"
@@ -11,11 +15,11 @@ module "elb-wp-frontend" {
 
   # Security Group
   security_group_ingress_rules = {
-    all_http = {
-      from_port   = 80
-      to_port     = 80
-      ip_protocol = "tcp"
-      description = "HTTP web traffic"
+    cloudfront_http = {
+      from_port      = 80
+      to_port        = 80
+      ip_protocol    = "tcp"
+      description    = "HTTP web traffic from CloudFront only"
       cidr_ipv4   = "0.0.0.0/0"
     }
   }
@@ -60,32 +64,31 @@ module "elb-wp-frontend" {
       port     = 80
       protocol = "HTTP"
 
-      forward = {
-        target_group_key = "${local.prefix}-ecs-wp-service"
+      fixed_response = {
+        content_type = "text/plain"
+        message_body = "Access denied"
+        status_code  = "403"
       }
 
-      # rules = {
-
-      #   ex-fixed-response = {
-                         
-      #     actions = [{
-      #       fixed_response = {
-
-      #         content_type = "text/plain"
-      #         status_code  = 200
-      #         message_body = "This is a fixed response"
-      #       }
-      #     }]
-
-      #     conditions = [{
-      #       http_header = {
-      #         http_header_name = "x-Gimme-Fixed-Response"
-      #         values           = ["yes", "please", "right now"]
-      #       }
-      #     }]
-      #   }
-      # }
-
+      rules = {
+        allow_cloudfront = {
+          priority = 1
+          conditions = [
+            {
+              http_header = {
+                http_header_name = "X-Allow"
+                values           = ["super_secret_token"]
+              }
+            }
+          ]
+          actions = [
+            {
+              type             = "forward"
+              target_group_key = "${local.prefix}-ecs-wp-service"
+            }
+          ]
+        }
+      }
     }
   }
 }
